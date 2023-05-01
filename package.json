@@ -1,0 +1,23 @@
+{
+  "name": "@hexlet/code",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "RSS aggregator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atty-ak/frontend-project-11.git"
+  },
+  "author": "Andrey K",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/atty-ak/frontend-project-11/issues"
+  },
+  "homepage": "https://github.com/atty-ak/frontend-project-11#readme",
+  "devDependencies": {
+    "eslint": "^8.39.0"
+  }
+}
