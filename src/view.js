@@ -1,10 +1,18 @@
-export default (state, elements) => {
-  const { input } = elements;
-  input.classList.remove('is-invalid');
-  if (state.isValid === false) {
-    input.classList.add('is-invalid');
-    return;
+export default (elements) => (path, value) => {
+  switch (path) {
+    case 'form.valid':
+      if (value === true) {
+        elements.input.classList.remove('is-invalid');
+        elements.input.value = '';
+        elements.input.focus();
+      }
+      break;
+
+    case 'form.error':
+      elements.input.classList.add('is-invalid');
+      break;
+
+    default:
+      break;
   }
-  input.value = '';
-  alert('rss загружен');
 };
