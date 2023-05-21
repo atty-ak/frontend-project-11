@@ -2,7 +2,7 @@ import * as yup from 'yup';
 import i18n from 'i18next';
 import axios from 'axios';
 import _ from 'lodash';
-import render from './view.js';
+import watchState from './view.js';
 import parseRss from './parser.js';
 import resources from './locales/index.js';
 
@@ -28,7 +28,7 @@ export default () => {
     uiStateModal: {},
   };
 
-  const watchedState = render(elements, initialState, i18nInstance);
+  const watchedState = watchState(elements, initialState, i18nInstance);
 
   const postsEventListener = (e) => {
     const targetPost = e.target;
