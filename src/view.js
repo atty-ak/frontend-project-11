@@ -18,7 +18,6 @@ const renderErrorForm = (input, statusMessage, i18nInstance, error) => {
   input.classList.add('is-invalid');
   statusMessage.classList.add('text-danger');
   statusMessage.textContent = i18nInstance.t(`formMessage.${error}`);
-  console.log(error);
 };
 
 const renderContainer = (type, i18nInstance) => {
