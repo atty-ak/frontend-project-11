@@ -15,6 +15,7 @@ export default () => {
     statusMessage: document.querySelector('.feedback'),
     feeds: document.querySelector('.feeds'),
     posts: document.querySelector('.posts'),
+    modal: document.getElementById('modal'),
   };
 
   const initialState = {
@@ -23,10 +24,34 @@ export default () => {
       error: null,
     },
     posts: [],
+    seenPosts: [],
     feeds: [],
+    uiStateModal: {},
   };
 
   const state = onChange(initialState, render(elements, initialState, i18nInstance));
+
+  const postsEventListener = (e) => {
+    const targetPost = e.target;
+    if (targetPost.tagName !== 'A') {
+      return;
+    }
+    const targetPostId = targetPost.dataset.id;
+    if (!state.seenPosts.includes(targetPostId)) {
+      state.seenPosts.push(targetPostId);
+    }
+  };
+
+  const modalEventListener = (e) => {
+    const button = e.relatedTarget;
+    const buttonId = button.dataset.id;
+    const currentPost = state.posts.find((post) => post.id === buttonId);
+    const { id } = currentPost;
+    if (!state.seenPosts.includes(id)) {
+      state.seenPosts.push(id);
+    }
+    state.uiStateModal = { ...currentPost };
+  };
 
   const validate = (url) => {
     const rssList = state.feeds.map((feed) => feed.url);
@@ -71,6 +96,9 @@ export default () => {
         setTimeout(checkForUpdates, 5000);
       });
   };
+
+  window.addEventListener('click', postsEventListener);
+  elements.modal.addEventListener('show.bs.modal', modalEventListener);
 
   i18nInstance.init({
     lng: 'ru',
