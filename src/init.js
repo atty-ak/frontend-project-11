@@ -45,6 +45,33 @@ export default () => {
     });
   };
 
+  const getUpdatedRss = () => {
+    const rssList = state.feeds.map((feed) => feed.url);
+    return rssList.map((url) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
+      .then((response) => parseRss(response.data.contents)));
+  };
+
+  const updatePosts = (posts) => {
+    const titles = state.posts.map((post) => post.title);
+    const postsToUpdate = posts.filter((post) => !titles.includes(post.title));
+    const postsWithID = addPostsID(postsToUpdate);
+    state.posts.push(...postsWithID);
+  };
+
+  const checkForUpdates = () => {
+    const promises = getUpdatedRss();
+    Promise.allSettled(promises)
+      .then((results) => {
+        const fullfiledPosts = results
+          .filter((result) => result.status === 'fulfilled')
+          .map((result) => result.value.posts);
+        updatePosts(fullfiledPosts.flat());
+      })
+      .finally(() => {
+        setTimeout(checkForUpdates, 5000);
+      });
+  };
+
   i18nInstance.init({
     lng: 'ru',
     debug: true,
@@ -78,4 +105,6 @@ export default () => {
         state.form.error = errorMessage;
       });
   }));
+
+  checkForUpdates();
 };
