@@ -1,5 +1,4 @@
 import * as yup from 'yup';
-import onChange from 'on-change';
 import i18n from 'i18next';
 import axios from 'axios';
 import _ from 'lodash';
@@ -29,7 +28,7 @@ export default () => {
     uiStateModal: {},
   };
 
-  const state = onChange(initialState, render(elements, initialState, i18nInstance));
+  const state = render(elements, initialState, i18nInstance);
 
   const postsEventListener = (e) => {
     const targetPost = e.target;

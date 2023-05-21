@@ -1,3 +1,5 @@
+import onChange from 'on-change';
+
 const renderFinishedForm = (input, statusMessage, i18nInstance) => {
   input.classList.remove('is-invalid');
   input.value = '';
@@ -107,7 +109,7 @@ const renderModalWindow = (modalEl, modalState) => {
   readFullArticle.href = modalState.link;
 };
 
-export default (elements, state, i18nInstance) => (path, value) => {
+export default (elements, state, i18nInstance) => onChange(state, (path, value) => {
   switch (path) {
     case 'form.status':
       switch (value) {
@@ -140,4 +142,4 @@ export default (elements, state, i18nInstance) => (path, value) => {
     default:
       break;
   }
-};
+});
