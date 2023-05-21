@@ -28,7 +28,7 @@ export default () => {
     uiStateModal: {},
   };
 
-  const state = render(elements, initialState, i18nInstance);
+  const watchedState = render(elements, initialState, i18nInstance);
 
   const postsEventListener = (e) => {
     const targetPost = e.target;
@@ -36,24 +36,24 @@ export default () => {
       return;
     }
     const targetPostId = targetPost.dataset.id;
-    if (!state.seenPosts.includes(targetPostId)) {
-      state.seenPosts.push(targetPostId);
+    if (!watchedState.seenPosts.includes(targetPostId)) {
+      watchedState.seenPosts.push(targetPostId);
     }
   };
 
   const modalEventListener = (e) => {
     const button = e.relatedTarget;
     const buttonId = button.dataset.id;
-    const currentPost = state.posts.find((post) => post.id === buttonId);
+    const currentPost = watchedState.posts.find((post) => post.id === buttonId);
     const { id } = currentPost;
-    if (!state.seenPosts.includes(id)) {
-      state.seenPosts.push(id);
+    if (!watchedState.seenPosts.includes(id)) {
+      watchedState.seenPosts.push(id);
     }
-    state.uiStateModal = { ...currentPost };
+    watchedState.uiStateModal = { ...currentPost };
   };
 
   const validate = (url) => {
-    const rssList = state.feeds.map((feed) => feed.url);
+    const rssList = watchedState.feeds.map((feed) => feed.url);
     const schema = yup.string()
       .required()
       .url()
@@ -70,16 +70,16 @@ export default () => {
   };
 
   const getUpdatedRss = () => {
-    const rssList = state.feeds.map((feed) => feed.url);
+    const rssList = watchedState.feeds.map((feed) => feed.url);
     return rssList.map((url) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
       .then((response) => parseRss(response.data.contents)));
   };
 
   const updatePosts = (posts) => {
-    const titles = state.posts.map((post) => post.title);
+    const titles = watchedState.posts.map((post) => post.title);
     const postsToUpdate = posts.filter((post) => !titles.includes(post.title));
     const postsWithID = addPostsID(postsToUpdate);
-    state.posts.push(...postsWithID);
+    watchedState.posts.push(...postsWithID);
   };
 
   const checkForUpdates = () => {
@@ -109,16 +109,16 @@ export default () => {
     const url = data.get('url');
     validate(url)
       .then(() => {
-        state.form.status = 'sending';
+        watchedState.form.status = 'sending';
         return axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`);
       })
       .then((response) => {
         const { feed, posts } = parseRss(response.data.contents);
         feed.url = url;
         const postsWithID = addPostsID(posts);
-        state.posts.push(...postsWithID);
-        state.feeds.push(feed);
-        state.form.status = 'finished';
+        watchedState.posts.push(...postsWithID);
+        watchedState.feeds.push(feed);
+        watchedState.form.status = 'finished';
       })
       .catch((e) => {
         let errorMessage;
@@ -129,7 +129,7 @@ export default () => {
         } else {
           errorMessage = e.type;
         }
-        state.form.error = errorMessage;
+        watchedState.form.error = errorMessage;
       });
   }));
 
