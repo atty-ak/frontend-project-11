@@ -59,7 +59,7 @@ const renderFeeds = (feedsEl, i18nInstance, feedList) => {
   feedsEl.append(view);
 };
 
-const renderPosts = (postsEl, modalEl, i18nInstance, postList) => {
+const renderPosts = (postsEl, i18nInstance, postList) => {
   postsEl.innerHTML = '';
   if (postList.length === 0) {
     return;
@@ -100,12 +100,9 @@ const renderSeenPosts = (IDs) => {
 };
 
 const renderModalWindow = (modalEl, modalState) => {
-  const title = modalEl.querySelector('.modal-title');
-  const body = modalEl.querySelector('.modal-body');
-  const readFullArticle = modalEl.querySelector('.full-article');
-  title.textContent = modalState.title;
-  body.textContent = modalState.description;
-  readFullArticle.href = modalState.link;
+  modalEl.title.textContent = modalState.title;
+  modalEl.description.textContent = modalState.description;
+  modalEl.readFullArticle.href = modalState.link;
 };
 
 export default (elements, state, i18nInstance) => onChange(state, (path, value) => {
@@ -126,7 +123,7 @@ export default (elements, state, i18nInstance) => onChange(state, (path, value) 
       renderErrorForm(elements.input, elements.statusMessage, i18nInstance, state.form.error);
       break;
     case 'posts':
-      renderPosts(elements.posts, elements.modal, i18nInstance, value);
+      renderPosts(elements.posts, i18nInstance, value);
       renderSeenPosts(state.seenPosts);
       break;
     case 'feeds':

@@ -14,7 +14,12 @@ export default () => {
     statusMessage: document.querySelector('.feedback'),
     feeds: document.querySelector('.feeds'),
     posts: document.querySelector('.posts'),
-    modal: document.getElementById('modal'),
+    modal: {
+      modalElement: document.querySelector('.modal'),
+      title: document.querySelector('.modal-title'),
+      description: document.querySelector('.modal-body'),
+      readFullArticle: document.querySelector('.full-article'),
+    },
   };
 
   const initialState = {
@@ -52,8 +57,8 @@ export default () => {
     watchedState.uiStateModal = { ...currentPost };
   };
 
-  const validate = (url) => {
-    const rssList = watchedState.feeds.map((feed) => feed.url);
+  const validate = (url, feedList) => {
+    const rssList = feedList.map((feed) => feed.url);
     const schema = yup.string()
       .required()
       .url()
@@ -69,9 +74,17 @@ export default () => {
     });
   };
 
+  const makeProxyUrl = (url) => {
+    const apiUrl = 'https://allorigins.hexlet.app/get';
+    const fullUrl = new URL(apiUrl);
+    fullUrl.searchParams.set('disableCache', 'true');
+    fullUrl.searchParams.set('url', url);
+    return axios.get(fullUrl);
+  };
+
   const getUpdatedRss = () => {
     const rssList = watchedState.feeds.map((feed) => feed.url);
-    return rssList.map((url) => axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
+    return rssList.map((url) => (makeProxyUrl(url))
       .then((response) => parseRss(response.data.contents)));
   };
 
@@ -96,8 +109,8 @@ export default () => {
       });
   };
 
-  window.addEventListener('click', postsEventListener);
-  elements.modal.addEventListener('show.bs.modal', modalEventListener);
+  elements.posts.addEventListener('click', postsEventListener);
+  elements.modal.modalElement.addEventListener('show.bs.modal', modalEventListener);
 
   i18nInstance.init({
     lng: 'ru',
@@ -107,10 +120,10 @@ export default () => {
     event.preventDefault();
     const data = new FormData(event.target);
     const url = data.get('url');
-    validate(url)
+    validate(url, watchedState.feeds)
       .then(() => {
         watchedState.form.status = 'sending';
-        return axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`);
+        return makeProxyUrl(url);
       })
       .then((response) => {
         const { feed, posts } = parseRss(response.data.contents);
