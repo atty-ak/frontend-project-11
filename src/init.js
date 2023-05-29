@@ -35,30 +35,30 @@ export default () => {
 
   const watchedState = watchState(elements, initialState, i18nInstance);
 
-  const postsEventListener = (e) => {
+  const postsEventListener = (e, state) => {
     const targetPost = e.target;
     if (targetPost.tagName !== 'A') {
       return;
     }
     const targetPostId = targetPost.dataset.id;
-    if (!watchedState.seenPosts.includes(targetPostId)) {
-      watchedState.seenPosts.push(targetPostId);
+    if (!state.seenPosts.includes(targetPostId)) {
+      state.seenPosts.push(targetPostId);
     }
   };
 
-  const modalEventListener = (e) => {
+  const modalEventListener = (e, state) => {
     const button = e.relatedTarget;
     const buttonId = button.dataset.id;
-    const currentPost = watchedState.posts.find((post) => post.id === buttonId);
+    const currentPost = state.posts.find((post) => post.id === buttonId);
     const { id } = currentPost;
-    if (!watchedState.seenPosts.includes(id)) {
-      watchedState.seenPosts.push(id);
+    if (!state.seenPosts.includes(id)) {
+      state.seenPosts.push(id);
     }
-    watchedState.uiStateModal = { ...currentPost };
+    state.uiStateModal = { ...currentPost };
   };
 
-  const validate = (url, feedList) => {
-    const rssList = feedList.map((feed) => feed.url);
+  const validate = (url, state) => {
+    const rssList = state.feeds.map((feed) => feed.url);
     const schema = yup.string()
       .required()
       .url()
@@ -82,31 +82,23 @@ export default () => {
     return axios.get(fullUrl);
   };
 
-  const getUpdatedRss = () => {
-    const rssList = watchedState.feeds.map((feed) => feed.url);
-    return rssList.map((url) => (makeProxyUrl(url))
+  const updateFeeds = (state) => {
+    const rssList = state.feeds.map((feed) => feed.url);
+    const promises = rssList.map((url) => makeProxyUrl(url)
       .then((response) => parseRss(response.data.contents)));
-  };
 
-  const updatePosts = (posts) => {
-    const titles = watchedState.posts.map((post) => post.title);
-    const postsToUpdate = posts.filter((post) => !titles.includes(post.title));
-    const postsWithID = addPostsID(postsToUpdate);
-    watchedState.posts.push(...postsWithID);
-  };
+    Promise.allSettled(promises).then((responses) => {
+      const fullfiledPosts = responses
+        .filter((response) => response.status === 'fulfilled')
+        .flatMap((response) => response.value.posts);
 
-  const checkForUpdates = () => {
-    const promises = getUpdatedRss();
-    Promise.allSettled(promises)
-      .then((results) => {
-        const fullfiledPosts = results
-          .filter((result) => result.status === 'fulfilled')
-          .map((result) => result.value.posts);
-        updatePosts(fullfiledPosts.flat());
-      })
-      .finally(() => {
-        setTimeout(checkForUpdates, 5000);
-      });
+      const titles = state.posts.map((post) => post.title);
+      const postsToUpdate = fullfiledPosts.filter((post) => !titles.includes(post.title));
+      const postsWithID = addPostsID(postsToUpdate);
+      state.posts.push(...postsWithID);
+
+      setTimeout(() => updateFeeds(state), 5000);
+    });
   };
 
   elements.posts.addEventListener('click', postsEventListener);
@@ -120,7 +112,7 @@ export default () => {
     event.preventDefault();
     const data = new FormData(event.target);
     const url = data.get('url');
-    validate(url, watchedState.feeds)
+    validate(url, watchedState)
       .then(() => {
         watchedState.form.status = 'sending';
         return makeProxyUrl(url);
@@ -146,5 +138,5 @@ export default () => {
       });
   }));
 
-  checkForUpdates();
+  updateFeeds(watchedState);
 };

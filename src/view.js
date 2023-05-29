@@ -91,8 +91,8 @@ const renderPosts = (postsEl, i18nInstance, postList) => {
   postsEl.append(view);
 };
 
-const renderSeenPosts = (IDs) => {
-  IDs.forEach((id) => {
+const renderSeenPosts = (seenPostIds) => {
+  seenPostIds.forEach((id) => {
     const seenPost = document.querySelector(`a[data-id="${id}"]`);
     seenPost.classList.remove('fw-bold');
     seenPost.classList.add('fw-normal', 'link-secondary');
