@@ -101,8 +101,8 @@ export default () => {
     });
   };
 
-  elements.posts.addEventListener('click', postsEventListener);
-  elements.modal.modalElement.addEventListener('show.bs.modal', modalEventListener);
+  elements.posts.addEventListener('click', (e) => postsEventListener(e, watchedState));
+  elements.modal.modalElement.addEventListener('show.bs.modal', (e) => modalEventListener(e, watchedState));
 
   i18nInstance.init({
     lng: 'ru',
